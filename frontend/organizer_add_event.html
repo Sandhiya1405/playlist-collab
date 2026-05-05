@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaylistCollab | Add Event</title>
+    <style>
+        :root {
+            --bg-color: #0b0f1a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+            --success: #10b981;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0b0f1a, #0b0f1a);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container { width: 100%; max-width: 620px; }
+
+        /* topbar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            padding: 10px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-family: inherit;
+            transition: color 0.2s;
+        }
+        .logout-btn:hover { color: var(--text-main); }
+
+        /* header */
+        header { text-align: center; margin-bottom: 36px; }
+
+        header h1 {
+            background: linear-gradient(to right, #c084fc, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+
+        .org-badge {
+            background: rgba(139,92,246,0.1);
+            border: 1px solid var(--accent);
+            padding: 6px 20px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: #d8b4fe;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        /* card */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 36px 40px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            margin-bottom: 22px;
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 26px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* form */
+        .field { margin-bottom: 22px; }
+
+        .field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 9px;
+        }
+
+        .field input,
+        .field textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(15,23,42,0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .field input:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+            background: rgba(15,23,42,0.95);
+        }
+        .field input::placeholder,
+        .field textarea::placeholder { color: rgba(148,163,184,0.4); }
+        .field textarea { resize: vertical; min-height: 95px; }
+
+        /* emoji row */
+        .emoji-row { display: grid; grid-template-columns: 76px 1fr; gap: 12px; }
+        .emoji-input { font-size: 1.9rem !important; text-align: center !important; padding: 8px 4px !important; }
+        .emoji-preview {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(139,92,246,0.07);
+            border: 1px dashed rgba(139,92,246,0.3);
+            border-radius: 12px; padding: 12px 16px;
+        }
+        .ep-big  { font-size: 1.8rem; }
+        .ep-hint { font-size: 0.83rem; color: var(--text-dim); }
+
+        /* buttons */
+        .btn-row { display: flex; gap: 12px; margin-top: 6px; }
+
+        .btn {
+            padding: 14px 26px; border: none; border-radius: 12px;
+            font-family: inherit; font-size: 1rem; font-weight: 700;
+            cursor: pointer; transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(139,92,246,0.4);
+        }
+        .btn-primary:hover  { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; filter: none; }
+        .btn-ghost {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+
+        /* messages */
+        .msg { padding: 12px 16px; border-radius: 12px; font-size: 0.88rem; margin-bottom: 18px; display: none; }
+        .msg.show { display: block; }
+        .msg.ok  { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+        .msg.err { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.3);  color: #fca5a5; }
+
+        /* published list */
+        .pub-list { display: flex; flex-direction: column; gap: 12px; }
+        .pub-item {
+            display: flex; align-items: center; gap: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px; padding: 14px 18px; transition: background 0.2s;
+        }
+        .pub-item:hover { background: rgba(255,255,255,0.06); }
+        .pub-icon { font-size: 2rem; min-width: 36px; text-align: center; }
+        .pub-info { flex: 1; }
+        .pub-name { font-weight: 700; font-size: 0.97rem; margin-bottom: 3px; }
+        .pub-desc { font-size: 0.82rem; color: var(--text-dim); }
+        .pub-by   { font-size: 0.75rem; color: rgba(139,92,246,0.8); margin-top: 3px; }
+        .live-pill {
+            background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3);
+            color: #6ee7b7; font-size: 0.72rem; font-weight: 600;
+            padding: 3px 10px; border-radius: 100px; white-space: nowrap;
+        }
+        .empty-note { text-align: center; padding: 30px; color: var(--text-dim); font-size: 0.9rem; }
+
+        /* toast */
+        .toast {
+            position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+            padding: 14px 20px; border-radius: 13px;
+            font-size: 0.88rem; font-weight: 500;
+            display: flex; align-items: center; gap: 10px;
+            animation: toastUp 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+        }
+        .toast.ok  { background: rgba(16,185,129,0.92); color: white; }
+        .toast.err { background: rgba(239,68,68,0.92);  color: white; }
+        @keyframes toastUp { from { transform: translateY(20px); opacity: 0; } }
+
+        @media (max-width: 580px) { .card { padding: 26px 20px; } header h1 { font-size: 2rem; } }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="topbar">
+        <button class="back-btn" onclick="window.location.href='organizer.html'">← Dashboard</button>
+        <button class="logout-btn" onclick="logout()">Logout →</button>
+    </div>
+
+    <header>
+        <h1>✨ Add New Event</h1>
+        <div class="org-badge" id="orgBadge">🎛️ Organizer</div>
+    </header>
+
+    <!-- Form card -->
+    <div class="card">
+        <div class="card-title">📝 Event Details</div>
+        <div id="formMsg" class="msg"></div>
+
+        <!-- Field 1: Name -->
+        <div class="field">
+            <label>Event Name *</label>
+            <input type="text" id="evtName" placeholder="e.g. Annual Day, Prom Night, Farewell…" maxlength="60" />
+        </div>
+
+        <!-- Field 2: Emoji -->
+        <div class="field">
+            <label>Emoji Icon *</label>
+            <div class="emoji-row">
+                <input type="text" id="evtEmoji" class="emoji-input" placeholder="🎵" maxlength="4" oninput="previewEmoji()" />
+                <div class="emoji-preview">
+                    <span class="ep-big"  id="emojiOut">🎵</span>
+                    <span class="ep-hint" id="emojiHint">Your icon preview</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Field 3: Description -->
+        <div class="field">
+            <label>Description *</label>
+            <textarea id="evtDesc" placeholder="Describe this event to students…"></textarea>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" id="publishBtn" onclick="publishEvent()">🚀 Publish Event</button>
+            <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+        </div>
+    </div>
+
+    <!-- Events published by this organizer -->
+    <div class="card">
+        <div class="card-title">📋 Events You've Published</div>
+        <div id="pubWrap"><div class="empty-note">Events you publish will appear here.</div></div>
+    </div>
+
+</div>
+<script>
+    const API   = 'http://localhost:5000/api';
+    const user  = JSON.parse(localStorage.getItem('user')  || 'null');
+    const token = localStorage.getItem('token') || '';
+
+
+    document.getElementById('orgBadge').textContent = '🎛️ ' + (user?.name || 'Organizer');
+
+    function logout() {
+        localStorage.removeItem('user'); localStorage.removeItem('token'); localStorage.removeItem('userRole');
+        window.location.href = 'auth.html';
+    }
+
+    function previewEmoji() {
+        const v = document.getElementById('evtEmoji').value.trim() || '🎵';
+        document.getElementById('emojiOut').textContent  = v;
+        document.getElementById('emojiHint').textContent = 'Looks great!';
+    }
+
+    function showMsg(txt, type) {
+        const el = document.getElementById('formMsg');
+        el.textContent = txt; el.className = 'msg show ' + type;
+    }
+    function hideMsg() { document.getElementById('formMsg').className = 'msg'; }
+
+    function toast(msg, type = 'ok') {
+        document.querySelectorAll('.toast').forEach(x => x.remove());
+        const el = document.createElement('div');
+        el.className = 'toast ' + type;
+        el.innerHTML = (type==='ok'?'✅ ':'❌ ') + msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 3500);
+    }
+
+    function clearForm() {
+        ['evtName','evtEmoji','evtDesc'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('emojiOut').textContent  = '🎵';
+        document.getElementById('emojiHint').textContent = 'Your icon preview';
+        hideMsg();
+    }
+
+    // ── PUBLISH → sent to backend → saved in Neo4j with organizer link ──
+    async function publishEvent() {
+        const name = document.getElementById('evtName').value.trim();
+        const icon = document.getElementById('evtEmoji').value.trim() || '🎵';
+        const desc = document.getElementById('evtDesc').value.trim();
+
+        if (!name) { showMsg('⚠️ Event name is required.', 'err'); return; }
+        if (!desc)  { showMsg('⚠️ Description is required.', 'err'); return; }
+
+        const btn = document.getElementById('publishBtn');
+        btn.disabled = true; btn.innerHTML = '⏳ Publishing…';
+        hideMsg();
+
+        try {
+            const res  = await fetch(`${API}/events`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body:    JSON.stringify({ name, icon, description: desc })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                showMsg(`✅ "${name}" is live! Students can see it now.`, 'ok');
+                clearForm();
+                toast(`"${name}" published!`);
+                loadMyEvents(); // refresh list
+            } else {
+                showMsg('⚠️ ' + (data.error || 'Failed to publish.'), 'err');
+            }
+        } catch {
+            showMsg('⚠️ Cannot reach server. Is the backend running?', 'err');
+        } finally {
+            btn.disabled = false; btn.innerHTML = '🚀 Publish Event';
+        }
+    }
+
+    // ── Load events created by THIS organizer ──
+    async function loadMyEvents() {
+        const wrap = document.getElementById('pubWrap');
+        try {
+            const res    = await fetch(`${API}/events/my`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const events = await res.json();
+
+            if (!res.ok || !events.length) {
+                wrap.innerHTML = '<div class="empty-note">Events you publish will appear here.</div>';
+                return;
+            }
+
+            wrap.innerHTML = '<div class="pub-list">' +
+                events.map(e => `
+                    <div class="pub-item">
+                        <div class="pub-icon">${e.icon}</div>
+                        <div class="pub-info">
+                            <div class="pub-name">${e.name}</div>
+                            <div class="pub-desc">${e.description}</div>
+                            <div class="pub-by">Added by you</div>
+                        </div>
+                        <span class="live-pill">✅ Live</span>
+                    </div>
+                `).join('') +
+            '</div>';
+        } catch {
+            wrap.innerHTML = '<div class="empty-note">Could not load events. Check server.</div>';
+        }
+    }
+
+    loadMyEvents();
+</script>
+</body>
+</html>

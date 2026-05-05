@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaylistCollab | Organizer Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #0b0f1a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+            --success: #10b981;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0b0f1a, #0b0f1a);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+        }
+
+        /* top bar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+            padding: 9px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-family: inherit;
+            transition: all 0.25s;
+        }
+        .logout-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+
+        /* header */
+        header { text-align: center; margin-bottom: 50px; }
+
+        header h1 {
+            background: linear-gradient(to right, #c084fc, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+
+        .welcome-badge {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--accent);
+            padding: 7px 22px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            color: #d8b4fe;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-top: 8px;
+        }
+
+        /* two big action cards */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            margin-top: 10px;
+        }
+
+        .action-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 50px 30px;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+
+        .action-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            box-shadow: 0 30px 60px -15px rgba(139,92,246,0.5);
+        }
+
+        .action-icon { font-size: 4rem; margin-bottom: 20px; display: block; }
+
+        .action-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .action-desc {
+            font-size: 0.93rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .actions-grid { grid-template-columns: 1fr; }
+            header h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="topbar">
+        <div></div>
+        <button class="logout-btn" onclick="logout()">← Logout</button>
+    </div>
+
+    <header>
+        <h1>🎛️ PlaylistCollab</h1>
+        <div class="welcome-badge" id="welcomeBadge">🎛️ Organizer</div>
+        <p class="subtitle">What would you like to do today?</p>
+    </header>
+
+    <div class="actions-grid">
+        <a class="action-card" href="organizer_add_event.html">
+            <span class="action-icon">✨</span>
+            <div class="action-title">Add New Event</div>
+            <div class="action-desc">Create a new event with a name, emoji and description. Students will see it instantly.</div>
+        </a>
+
+        <a class="action-card" href="organizer_finalize.html">
+            <span class="action-icon">🏆</span>
+            <div class="action-title">Finalize Playlist</div>
+            <div class="action-desc">View all events, see the top 10 voted songs, and download the final playlist as CSV.</div>
+        </a>
+    </div>
+
+</div>
+
+<script>
+    const user  = JSON.parse(localStorage.getItem('user')  || 'null');
+    const token = localStorage.getItem('token') || '';
+
+
+    document.getElementById('welcomeBadge').textContent = '👋 Welcome, ' + (user?.name || 'Organizer');
+
+    function logout() {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        window.location.href = 'auth.html';
+    }
+</script>
+</body>
+</html>

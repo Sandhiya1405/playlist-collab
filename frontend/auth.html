@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaylistCollab | Login / Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f1a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+            --success: #10b981;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --error: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0b0f1a, #0b0f1a);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'DM Sans', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient orbs */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.08), transparent 70%);
+            top: -100px; right: -100px;
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            width: 400px; height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(192, 132, 252, 0.05), transparent 70%);
+            bottom: -100px; left: -100px;
+            pointer-events: none;
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 520px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #c084fc, #8b5cf6, #6d28d9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 18px var(--accent-glow));
+            letter-spacing: -1px;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .tagline {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        /* CARD */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6),
+                        inset 0 1px 0 rgba(255,255,255,0.06);
+            overflow: hidden;
+        }
+
+        /* TAB SWITCHER */
+        .tab-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 18px;
+            color: var(--text-dim);
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--text-main);
+            background: rgba(139, 92, 246, 0.06);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 15%; right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, #8b5cf6, #c084fc);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.04);
+        }
+
+        /* FORM AREA */
+        .form-body {
+            padding: 36px 40px 40px;
+        }
+
+        /* Role selector */
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .role-btn {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            color: var(--text-dim);
+        }
+
+        .role-btn:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            color: var(--text-main);
+            background: rgba(139, 92, 246, 0.08);
+        }
+
+        .role-btn.selected {
+            border-color: var(--accent);
+            background: rgba(139, 92, 246, 0.15);
+            color: #d8b4fe;
+            box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.3);
+        }
+
+        .role-icon { font-size: 1.6rem; display: block; margin-bottom: 5px; }
+        .role-label {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        /* Fields */
+        .fields-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 13px 15px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.25s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        select option { background: #1e293b; color: var(--text-main); }
+
+        input::placeholder { color: rgba(148, 163, 184, 0.45); }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        input.error-field {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .field-hint {
+            font-size: 0.78rem;
+            color: rgba(148, 163, 184, 0.5);
+            margin-top: 2px;
+        }
+
+        /* Password wrapper */
+        .pw-wrap { position: relative; }
+        .pw-wrap input { padding-right: 48px; }
+        .pw-toggle {
+            position: absolute;
+            right: 14px; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: none;
+            color: var(--text-dim); cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+            padding: 0;
+        }
+        .pw-toggle:hover { color: var(--text-main); }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--glass-border);
+            margin: 8px 0 4px;
+        }
+
+        /* Submit btn */
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-submit:hover::before { opacity: 1; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -5px rgba(139, 92, 246, 0.6); }
+        .btn-submit:active { transform: translateY(0); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Inline message */
+        .msg-box {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            margin-bottom: 6px;
+            display: none;
+        }
+        .msg-box.success {
+            display: block;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+        .msg-box.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        /* Panel states */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        @media (max-width: 560px) {
+            .form-body { padding: 28px 24px 32px; }
+            .field-row { grid-template-columns: 1fr; }
+            .logo { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <header>
+        <div class="logo">🎵 PlaylistCollab</div>
+        <p class="tagline">Collaborative playlists for every campus event</p>
+    </header>
+
+    <div class="card">
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+            <button class="tab-btn active" id="loginTab" onclick="switchTab('login')">Log In</button>
+            <button class="tab-btn" id="signupTab" onclick="switchTab('signup')">Sign Up</button>
+        </div>
+
+        <div class="form-body">
+
+            <!-- ===== LOGIN PANEL ===== -->
+            <div class="panel active" id="loginPanel">
+                <!-- Role chooser -->
+                <div class="role-selector">
+                    <div class="role-btn selected" id="loginStudentBtn" onclick="selectLoginRole('student')">
+                        <span class="role-icon">🎓</span>
+                        <span class="role-label">Student</span>
+                    </div>
+                    <div class="role-btn" id="loginOrganizerBtn" onclick="selectLoginRole('organizer')">
+                        <span class="role-icon">🎛️</span>
+                        <span class="role-label">Organizer</span>
+                    </div>
+                </div>
+
+                <div id="loginMsg" class="msg-box"></div>
+
+                <div class="fields-grid">
+                    <div class="form-group">
+                        <label>ID</label>
+                        <input type="text" id="loginRoll" placeholder="Enter your ID" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="pw-wrap">
+                            <input type="password" id="loginPassword" placeholder="Enter your password" />
+                            <button class="pw-toggle" onclick="togglePw('loginPassword', this)">👁</button>
+                        </div>
+                    </div>
+
+                    <button class="btn-submit" onclick="handleLogin()">Log In →</button>
+                </div>
+            </div>
+
+            <!-- ===== SIGNUP PANEL ===== -->
+            <div class="panel" id="signupPanel">
+                <!-- Role chooser -->
+                <div class="role-selector">
+                    <div class="role-btn selected" id="signupStudentBtn" onclick="selectSignupRole('student')">
+                        <span class="role-icon">🎓</span>
+                        <span class="role-label">Student</span>
+                    </div>
+                    <div class="role-btn" id="signupOrganizerBtn" onclick="selectSignupRole('organizer')">
+                        <span class="role-icon">🎛️</span>
+                        <span class="role-label">Organizer</span>
+                    </div>
+                </div>
+
+                <div id="signupMsg" class="msg-box"></div>
+
+                <div class="fields-grid">
+                    <!-- Name + Roll -->
+                    <div class="field-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="signupName" placeholder="Your full name" />
+                        </div>
+                        <div class="form-group">
+                            <label>Roll Number</label>
+                            <input type="text" id="signupRoll" placeholder="e.g. 22CS101" />
+                        </div>
+                    </div>
+
+                    <!-- ID + Department -->
+                    <div class="field-row">
+                        <div class="form-group" id="idFieldGroup">
+                            <label id="idLabel">Student ID</label>
+                            <input type="text" id="signupId" placeholder="Your Student ID" />
+                        </div>
+                        <div class="form-group">
+                            <label>Department</label>
+                            <select id="signupDept">
+                                <option value="" disabled selected>Select dept.</option>
+                                <option>CSE</option>
+                                <option>IT</option>
+                                <option>ECE</option>
+                                <option>EEE</option>
+                                <option>MECH</option>
+                                <option>CIVIL</option>
+                                <option>AIDS</option>
+                                <option>AIML</option>
+                                <option>CSBS</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label>College Email</label>
+                        <input type="email" id="signupEmail" placeholder="yourname@college.edu" />
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="pw-wrap">
+                            <input type="password" id="signupPassword" placeholder="Min. 6 characters" />
+                            <button class="pw-toggle" onclick="togglePw('signupPassword', this)">👁</button>
+                        </div>
+                    </div>
+
+                    <button class="btn-submit" onclick="handleSignup()">Sign Up →</button>
+                </div>
+            </div>
+
+        </div><!-- /form-body -->
+    </div><!-- /card -->
+</div>
+
+<script>
+    const API_URL = 'http://localhost:5000/api';
+
+    // ===== STATE =====
+    let loginRole = 'student';
+    let signupRole = 'student';
+
+    // ===== TAB SWITCH =====
+    function switchTab(tab) {
+        document.getElementById('loginPanel').classList.toggle('active', tab === 'login');
+        document.getElementById('signupPanel').classList.toggle('active', tab === 'signup');
+        document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+        document.getElementById('signupTab').classList.toggle('active', tab === 'signup');
+        clearMsg('loginMsg');
+        clearMsg('signupMsg');
+    }
+
+    // ===== ROLE SELECT =====
+    function selectLoginRole(role) {
+        loginRole = role;
+        document.getElementById('loginStudentBtn').classList.toggle('selected', role === 'student');
+        document.getElementById('loginOrganizerBtn').classList.toggle('selected', role === 'organizer');
+    }
+
+    function selectSignupRole(role) {
+        signupRole = role;
+        document.getElementById('signupStudentBtn').classList.toggle('selected', role === 'student');
+        document.getElementById('signupOrganizerBtn').classList.toggle('selected', role === 'organizer');
+
+        // Update ID label
+        document.getElementById('idLabel').textContent = role === 'student' ? 'Student ID' : 'Organizer ID';
+        document.getElementById('signupId').placeholder = role === 'student' ? 'Your Student ID' : 'Your Organizer ID';
+    }
+
+    // ===== UTILS =====
+    function togglePw(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁';
+        }
+    }
+
+    function showMsg(id, text, type) {
+        const el = document.getElementById(id);
+        el.textContent = text;
+        el.className = 'msg-box ' + type;
+    }
+
+    function clearMsg(id) {
+        const el = document.getElementById(id);
+        el.className = 'msg-box';
+        el.textContent = '';
+    }
+
+    // ===== LOGIN =====
+    async function handleLogin() {
+        const roll = document.getElementById('loginRoll').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        if (!roll || !password) {
+            showMsg('loginMsg', '⚠️ Please fill in all fields.', 'error');
+            return;
+        }
+
+        const btn = document.querySelector('#loginPanel .btn-submit');
+        btn.disabled = true;
+        btn.textContent = 'Signing in...';
+        clearMsg('loginMsg');
+
+        try {
+            const res = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roll, password, role: loginRole })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('userRole', loginRole);
+
+    showMsg('loginMsg', `✅ Welcome back, ${data.user?.name || roll}!`, 'success');
+
+    setTimeout(() => {
+        if (loginRole === 'organizer') {
+            window.location.href = 'organizer.html';
+        } else {
+            window.location.href = 'events.html';
+        }
+    }, 1000);
+
+} else {
+    showMsg('loginMsg', `⚠️ ${data.message || 'Invalid credentials.'}`, 'error');
+}
+        } catch (e) {
+            showMsg('loginMsg', '⚠️ Cannot connect to server. Is the backend running?', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Login →';
+        }
+    }
+
+    // ===== SIGNUP =====
+    async function handleSignup() {
+        const name   = document.getElementById('signupName').value.trim();
+        const roll   = document.getElementById('signupRoll').value.trim();
+        const id     = document.getElementById('signupId').value.trim();
+        const dept   = document.getElementById('signupDept').value;
+        const email  = document.getElementById('signupEmail').value.trim();
+        const pass   = document.getElementById('signupPassword').value;
+
+        if (!name || !roll || !id || !dept || !email || !pass) {
+            showMsg('signupMsg', '⚠️ Please fill in all fields.', 'error');
+            return;
+        }
+        if (pass.length < 6) {
+            showMsg('signupMsg', '⚠️ Password must be at least 6 characters.', 'error');
+            return;
+        }
+        if (!email.includes('@')) {
+            showMsg('signupMsg', '⚠️ Please enter a valid email address.', 'error');
+            return;
+        }
+
+        const btn = document.querySelector('#signupPanel .btn-submit');
+        btn.disabled = true;
+        btn.textContent = 'Creating account...';
+        clearMsg('signupMsg');
+
+        try {
+            const res = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name, roll,
+                    [signupRole === 'student' ? 'studentId' : 'organizerId']: id,
+                    department: dept,
+                    email,
+                    password: pass,
+                    role: signupRole
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                showMsg('signupMsg', '✅ Account created! Redirecting to login...', 'success');
+                setTimeout(() => switchTab('login'), 1800);
+            } else {
+                showMsg('signupMsg', `⚠️ ${data.error || 'Registration failed.'}`, 'error');
+            }
+        } catch (e) {
+            showMsg('signupMsg', '⚠️ Cannot connect to server. Is the backend running?', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Create Account →';
+        }
+    }
+
+    // Enter key support
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        if (document.getElementById('loginPanel').classList.contains('active')) handleLogin();
+        else handleSignup();
+    });
+</script>
+
+</body>
+</html>

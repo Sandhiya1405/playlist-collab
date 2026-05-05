@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaylistCollab | Vote for Songs</title>
+    <style>
+        :root {
+            --bg-color: #0b0f1a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+            --success: #10b981;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0b0f1a, #0b0f1a);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            background: linear-gradient(to right, #c084fc, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+
+        .event-badge {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--accent);
+            padding: 6px 20px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: #d8b4fe;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            display: inline-block;
+            border: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            transform: translateX(-5px);
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .vote-status {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--accent);
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #d8b4fe;
+        }
+
+        .song-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px 25px;
+            margin-bottom: 15px;
+            border-radius: 18px;
+            border: 1px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .song-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+            transform: scale(1.01);
+            border-color: var(--glass-border);
+        }
+
+        .song-item.rank-0 { 
+            border-left: 5px solid #fbbf24; 
+            background: linear-gradient(90deg, rgba(251, 191, 36, 0.1), transparent); 
+        }
+        .song-item.rank-1 { 
+            border-left: 5px solid #cbd5e1; 
+            background: linear-gradient(90deg, rgba(203, 213, 225, 0.1), transparent); 
+        }
+        .song-item.rank-2 { 
+            border-left: 5px solid #cd7f32; 
+            background: linear-gradient(90deg, rgba(205, 127, 50, 0.1), transparent); 
+        }
+
+        .song-item.already-voted {
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), rgba(30, 41, 59, 0.1)) !important;
+            border-left: 5px solid var(--success) !important;
+            opacity: 0.9;
+        }
+
+        .song-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .song-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .song-artist {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .vote-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .vote-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .vote-btn {
+            background: var(--success);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .vote-btn:hover:not(:disabled) {
+            filter: brightness(1.2);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .vote-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #475569;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-dim);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.success { 
+            background: rgba(16, 185, 129, 0.95); 
+            border: 1px solid rgba(16, 185, 129, 0.5); 
+            color: white; 
+        }
+        
+        .toast.error { 
+            background: rgba(239, 68, 68, 0.95); 
+            border: 1px solid rgba(239, 68, 68, 0.5); 
+            color: white; 
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .song-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .vote-section {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .toast {
+                left: 10px;
+                right: 10px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button class="back-btn" onclick="goBack()">← Back to Actions</button>
+
+    <header>
+        <h1>👍 Vote for Songs</h1>
+        <div class="event-badge" id="eventName">Loading...</div>
+    </header>
+
+    <div class="card">
+        <div id="voteStatus"></div>
+        <div id="leaderboard">
+            <div class="loading">Fetching the latest rankings...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:5000/api';
+    let songs = [];
+    let votedSongIds = new Set();
+    let isVoting = false;
+
+    const selectedEvent = localStorage.getItem('selectedEvent');
+    if (!selectedEvent) {
+        window.location.href = 'events.html';
+    } else {
+        document.getElementById('eventName').textContent = selectedEvent;
+    }
+
+    // ============= SAFE TOAST FUNCTION (NO ALERTS) =============
+    function showToast(message, type = 'success') {
+        try {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span style="font-size: 1.2rem;">${type === 'success' ? '✅' : '❌'}</span>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (toast && toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            }, 3500);
+        } catch (e) {
+            // Silently fail - don't show any alert
+            console.error('Toast error:', e);
+        }
+    }
+
+    // ============= USER ID =============
+    function getUserId() {
+        try {
+            let userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', userId);
+            }
+            return userId;
+        } catch (e) {
+            console.error('getUserId error:', e);
+            return 'user_' + Date.now();
+        }
+    }
+
+    // ============= VOTE TRACKING =============
+    function loadUserVotes() {
+        try {
+            const userId = getUserId();
+            const storageKey = `votes_${userId}_${selectedEvent}`;
+            const savedVotes = localStorage.getItem(storageKey);
+            
+            if (savedVotes) {
+                const parsed = JSON.parse(savedVotes);
+                votedSongIds = new Set(Array.isArray(parsed) ? parsed : []);
+            } else {
+                votedSongIds = new Set();
+            }
+        } catch (e) {
+            console.error('loadUserVotes error:', e);
+            votedSongIds = new Set();
+        }
+        updateVoteStatusUI();
+    }
+
+    function saveUserVotes() {
+        try {
+            const userId = getUserId();
+            const storageKey = `votes_${userId}_${selectedEvent}`;
+            localStorage.setItem(storageKey, JSON.stringify(Array.from(votedSongIds)));
+        } catch (e) {
+            console.error('saveUserVotes error:', e);
+        }
+    }
+
+    function updateVoteStatusUI() {
+        try {
+            const statusDiv = document.getElementById('voteStatus');
+            const count = votedSongIds.size;
+            if (statusDiv) {
+                statusDiv.innerHTML = `
+                    <div class="vote-status">
+                        💡 Vote for as many as you like! • Voted for <strong>${count}</strong> song${count !== 1 ? 's' : ''}
+                    </div>`;
+            }
+        } catch (e) {
+            console.error('updateVoteStatusUI error:', e);
+        }
+    }
+
+    // ============= FETCH SONGS (BULLETPROOF) =============
+    async function fetchSongs() {
+        try {
+            const url = `${API_URL}/songs/event/${encodeURIComponent(selectedEvent)}/top/20`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // Validate and sanitize data
+            if (Array.isArray(data)) {
+                songs = data.filter(song => {
+                    return song && 
+                           typeof song === 'object' && 
+                           song._id && 
+                           song.title && 
+                           song.artist;
+                }).map(song => ({
+                    _id: String(song._id),
+                    title: String(song.title || 'Unknown'),
+                    artist: String(song.artist || 'Unknown'),
+                    votes: Number(song.votes) || 0,
+                    event: String(song.event || selectedEvent)
+                }));
+            } else {
+                songs = [];
+            }
+            
+            updateUI();
+            
+        } catch (error) {
+            console.error('fetchSongs error:', error);
+            const leaderboard = document.getElementById('leaderboard');
+            if (leaderboard) {
+                leaderboard.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📡</div>
+                        <h3>Connection Issue</h3>
+                        <p>Unable to sync with the music server.</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">Error: ${error.message}</p>
+                    </div>`;
+            }
+        }
+    }
+
+    // ============= CAST VOTE (COMPLETELY SAFE) =============
+    async function castVote(songId) {
+        // Prevent double-clicks and already voted
+        if (isVoting || !songId) {
+            return;
+        }
+
+        const songIdStr = String(songId);
+        
+        if (votedSongIds.has(songIdStr)) {
+            showToast('You already voted for this song!', 'error');
+            return;
+        }
+
+        isVoting = true;
+
+        // Find song for display name (with fallback)
+        let songTitle = 'this song';
+        try {
+            const song = songs.find(s => String(s._id) === songIdStr);
+            if (song && song.title) {
+                songTitle = song.title;
+            }
+        } catch (e) {
+            console.error('Error finding song:', e);
+        }
+
+        // Update button state safely
+        const btn = document.querySelector(`button[data-song-id="${songIdStr}"]`);
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Voting...';
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/songs/${songIdStr}/vote`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    userId: getUserId(), 
+                    event: selectedEvent 
+                })
+            });
+
+            let result = {};
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                console.error('JSON parse error:', jsonError);
+                result = { error: 'Invalid response from server' };
+            }
+
+            if (response.ok) {
+                // Success!
+                votedSongIds.add(songIdStr);
+                saveUserVotes();
+                updateVoteStatusUI();
+                showToast(`Vote recorded for ${songTitle}!`, 'success');
+                
+                // Refresh songs
+                await fetchSongs();
+            } else {
+                // Error from server
+                const errorMsg = (result && result.error) ? result.error : 'Voting failed';
+                showToast(errorMsg, 'error');
+                
+                // Re-enable button
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '👍 Vote';
+                }
+            }
+        } catch (error) {
+            console.error('castVote error:', error);
+            showToast('Network error - please try again', 'error');
+            
+            // Re-enable button
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '👍 Vote';
+            }
+        } finally {
+            isVoting = false;
+        }
+    }
+
+    // ============= UPDATE UI (SAFE RENDERING) =============
+    function updateUI() {
+        try {
+            const leaderboard = document.getElementById('leaderboard');
+            if (!leaderboard) return;
+
+            if (!songs || songs.length === 0) {
+                leaderboard.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎵</div>
+                        <h3>No Songs Yet</h3>
+                        <p>Be the first to suggest a track for ${selectedEvent}!</p>
+                    </div>`;
+                return;
+            }
+
+            const html = songs.map((song, index) => {
+                const sId = String(song._id || '');
+                const hasVoted = votedSongIds.has(sId);
+                const rankClass = index < 3 ? `rank-${index}` : '';
+                const votedClass = hasVoted ? 'already-voted' : '';
+                
+                return `
+                    <div class="song-item ${rankClass} ${votedClass}">
+                        <div class="song-info">
+                            <span class="song-title">#${index + 1} ${song.title || 'Unknown'}</span>
+                            <span class="song-artist">${song.artist || 'Unknown Artist'}</span>
+                        </div>
+                        <div class="vote-section">
+                            <span class="vote-count">${song.votes || 0}</span>
+                            <button 
+                                class="vote-btn" 
+                                data-song-id="${sId}"
+                                onclick="castVote('${sId}')"
+                                ${hasVoted ? 'disabled' : ''}
+                            >
+                                ${hasVoted ? '✓ Voted' : '👍 Vote'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            leaderboard.innerHTML = html;
+            
+        } catch (error) {
+            console.error('updateUI error:', error);
+        }
+    }
+
+    // ============= NAVIGATION =============
+    function goBack() { 
+        window.location.href = 'actions.html'; 
+    }
+
+    // ============= INITIALIZATION =============
+    try {
+        loadUserVotes();
+        fetchSongs();
+
+        // Auto-refresh every 10 seconds
+        setInterval(() => {
+            if (!isVoting) {
+                fetchSongs();
+            }
+        }, 10000);
+    } catch (error) {
+        console.error('Initialization error:', error);
+    }
+</script>
+</body>
+</html>

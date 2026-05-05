@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaylistCollab | Choose Action</title>
+    <style>
+        :root {
+            --bg-color: #0b0f1a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+            --success: #10b981;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0b0f1a, #0b0f1a);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        header h1 {
+            background: linear-gradient(to right, #c084fc, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+
+        .event-badge {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--accent);
+            padding: 8px 24px;
+            border-radius: 100px;
+            font-size: 1rem;
+            color: #d8b4fe;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .actions-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .action-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 50px 40px;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+        }
+
+        .action-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            box-shadow: 0 30px 60px -15px rgba(139, 92, 246, 0.5);
+        }
+
+        .action-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .action-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .action-desc {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .actions-container {
+                grid-template-columns: 1fr;
+            }
+            header h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button class="back-btn" onclick="goBack()">← Back to Events</button>
+
+    <header>
+        <h1>🎵 PlaylistCollab</h1>
+        <div class="event-badge" id="eventName">Loading...</div>
+        <p style="color: var(--text-dim); font-size: 1.1rem;">What would you like to do?</p>
+    </header>
+
+    <div class="actions-container">
+        <div class="action-card" onclick="goToSuggest()">
+            <div class="action-icon">🎤</div>
+            <div class="action-title">Suggest a Song</div>
+            <div class="action-desc">Add your favorite tracks to the playlist with smart search</div>
+        </div>
+
+        <div class="action-card" onclick="goToVote()">
+            <div class="action-icon">👍</div>
+            <div class="action-title">Vote for Songs</div>
+            <div class="action-desc">Support your favorites from the top 20 suggestions</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get selected event from localStorage
+    const selectedEvent = localStorage.getItem('selectedEvent');
+    
+    if (!selectedEvent) {
+        // If no event selected, go back to event selection
+        window.location.href = 'events.html';
+    } else {
+        document.getElementById('eventName').textContent = selectedEvent;
+    }
+
+    function goBack() {
+        window.location.href = 'events.html';
+    }
+
+    function goToSuggest() {
+        window.location.href = 'suggest.html';
+    }
+
+    function goToVote() {
+        window.location.href = 'vote.html';
+    }
+</script>
+</body>
+</html>

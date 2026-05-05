@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaylistCollab | Finalize Playlist</title>
+    <style>
+        :root {
+            --bg-color: #0b0f1a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+            --success: #10b981;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0b0f1a, #0b0f1a);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0; padding: 40px 20px;
+            display: flex; justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container { width: 100%; max-width: 800px; }
+
+        .topbar {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 32px;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            color: var(--text-dim); padding: 10px 20px; border-radius: 10px;
+            cursor: pointer; font-size: 0.9rem; font-family: inherit; transition: all 0.3s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+        .logout-btn {
+            background: transparent; border: none; color: var(--text-dim);
+            padding: 10px; cursor: pointer; font-size: 0.88rem;
+            font-family: inherit; transition: color 0.2s;
+        }
+        .logout-btn:hover { color: var(--text-main); }
+
+        header { text-align: center; margin-bottom: 40px; }
+        header h1 {
+            background: linear-gradient(to right, #c084fc, #8b5cf6);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 2.5rem; font-weight: 800; margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+        .org-badge {
+            background: rgba(139,92,246,0.1); border: 1px solid var(--accent);
+            padding: 6px 20px; border-radius: 100px; font-size: 0.85rem;
+            color: #d8b4fe; text-transform: uppercase; letter-spacing: 1px; display: inline-block;
+        }
+
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            padding: 32px 36px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            margin-bottom: 24px;
+        }
+        .card-title {
+            font-size: 1.05rem; font-weight: 700; color: var(--text-main);
+            margin-bottom: 22px; display: flex; align-items: center; gap: 8px;
+        }
+
+        /* events grid */
+        .ev-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 14px;
+        }
+        .ev-tile {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+            border-radius: 18px; padding: 22px 12px; cursor: pointer;
+            text-align: center; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        .ev-tile:hover {
+            border-color: rgba(139,92,246,0.45); background: rgba(139,92,246,0.08);
+            transform: translateY(-5px); box-shadow: 0 12px 28px -8px rgba(139,92,246,0.3);
+        }
+        .ev-tile.selected {
+            border-color: var(--accent); background: rgba(139,92,246,0.15);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .ev-tile-icon { font-size: 2.2rem; margin-bottom: 9px; }
+        .ev-tile-name { font-size: 0.86rem; font-weight: 700; }
+
+        .loading-note { text-align: center; padding: 30px; color: var(--text-dim); font-size: 0.9rem; }
+
+        /* songs list */
+        .songs-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .songs-title { font-size: 1.05rem; font-weight: 700; }
+
+        .song-row {
+            display: flex; align-items: center; gap: 14px;
+            background: rgba(255,255,255,0.03); border: 1px solid transparent;
+            border-radius: 16px; padding: 15px 18px; margin-bottom: 10px; transition: all 0.22s;
+        }
+        .song-row:hover { background: rgba(255,255,255,0.06); border-color: var(--glass-border); }
+        .song-row.m0 { border-left: 4px solid #fbbf24; background: linear-gradient(90deg, rgba(251,191,36,0.08), transparent); }
+        .song-row.m1 { border-left: 4px solid #cbd5e1; background: linear-gradient(90deg, rgba(203,213,225,0.07), transparent); }
+        .song-row.m2 { border-left: 4px solid #cd7f32; background: linear-gradient(90deg, rgba(205,127,50,0.07), transparent); }
+
+        .rank-label { font-size: 1.2rem; min-width: 32px; text-align: center; }
+        .rank-num   { font-size: 0.9rem; font-weight: 800; color: var(--text-dim); min-width: 32px; text-align: center; }
+        .song-info  { flex: 1; }
+        .song-t     { font-weight: 700; font-size: 0.97rem; }
+        .song-a     { font-size: 0.82rem; color: var(--text-dim); margin-top: 2px; }
+
+        .vote-wrap  { display: flex; align-items: center; gap: 10px; }
+        .bar-bg     { width: 80px; height: 5px; background: rgba(255,255,255,0.07); border-radius: 100px; overflow: hidden; }
+        .bar-fill   { height: 100%; border-radius: 100px; background: linear-gradient(90deg, #8b5cf6, #c084fc); transition: width 0.6s ease; }
+        .vote-badge {
+            background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3);
+            color: #d8b4fe; font-size: 0.82rem; font-weight: 700;
+            padding: 3px 11px; border-radius: 100px; white-space: nowrap;
+        }
+
+        /* extract bar */
+        .extract-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.22);
+            border-radius: 14px; padding: 16px 22px; margin-top: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .extract-info { font-size: 0.9rem; color: var(--text-dim); }
+        .extract-info strong { color: var(--text-main); }
+
+        .btn {
+            padding: 13px 24px; border: none; border-radius: 12px;
+            font-family: inherit; font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; transition: all 0.25s;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-green {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white; box-shadow: 0 10px 25px -5px rgba(16,185,129,0.35);
+        }
+        .btn-green:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        /* toast */
+        .toast {
+            position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+            padding: 14px 20px; border-radius: 13px;
+            font-size: 0.88rem; font-weight: 500;
+            display: flex; align-items: center; gap: 10px;
+            animation: toastUp 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+        }
+        .toast.ok  { background: rgba(16,185,129,0.92); color: white; }
+        .toast.err { background: rgba(239,68,68,0.92);  color: white; }
+        @keyframes toastUp { from { transform: translateY(20px); opacity: 0; } }
+
+        @media (max-width: 580px) {
+            .card { padding: 24px 18px; }
+            header h1 { font-size: 2rem; }
+            .ev-grid { grid-template-columns: repeat(3,1fr); }
+            .bar-bg  { display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="topbar">
+        <button class="back-btn" onclick="window.location.href='organizer.html'">← Dashboard</button>
+        <button class="logout-btn" onclick="logout()">Logout →</button>
+    </div>
+
+    <header>
+        <h1>🏆 Finalize Playlist</h1>
+        <div class="org-badge" id="orgBadge">🎛️ Organizer</div>
+    </header>
+
+    <!-- All events grid -->
+    <div class="card">
+        <div class="card-title">🎪 All Events — Click to View Top 10</div>
+        <div class="ev-grid" id="evGrid">
+            <div class="loading-note">Loading events…</div>
+        </div>
+    </div>
+
+    <!-- Top 10 panel — shown after clicking an event -->
+    <div class="card" id="songsCard" style="display:none;">
+        <div class="songs-header">
+            <div class="songs-title" id="songsTitle">Top 10 Songs</div>
+        </div>
+        <div id="songsList"></div>
+        <div class="extract-bar" id="extractBar" style="display:none;">
+            <div class="extract-info">
+                <strong id="extractEvt">—</strong> &nbsp;·&nbsp;
+                Top <strong id="extractCnt">—</strong> songs
+                &nbsp;<span style="color:#6ee7b7;font-size:0.8rem;">✅ Snapshot saved to Neo4j</span>
+            </div>
+            <button class="btn btn-green" onclick="downloadCSV()">⬇️ Download CSV</button>
+        </div>
+    </div>
+
+</div>
+<script>
+    const API   = 'http://localhost:5000/api';
+    const user  = JSON.parse(localStorage.getItem('user')  || 'null');
+    const token = localStorage.getItem('token') || '';
+
+    if (!user || !token || user.role !== 'organizer') window.location.href = 'auth.html';
+    document.getElementById('orgBadge').textContent = '🎛️ ' + (user?.name || 'Organizer');
+
+    function logout() {
+        localStorage.removeItem('user'); localStorage.removeItem('token'); localStorage.removeItem('userRole');
+        window.location.href = 'auth.html';
+    }
+
+    // ── Load all events from Neo4j ──
+    async function loadEvents() {
+        const grid = document.getElementById('evGrid');
+        try {
+            const res    = await fetch(`${API}/events`);
+            const events = await res.json();
+            if (!res.ok || !events.length) throw new Error();
+            renderGrid(events);
+        } catch {
+            grid.innerHTML = '<div class="loading-note">Could not load events. Check server.</div>';
+        }
+    }
+
+    function safeid(name) { return name.replace(/[^a-zA-Z0-9]/g,'_'); }
+
+    function renderGrid(events) {
+        const grid = document.getElementById('evGrid');
+        grid.innerHTML = events.map(e => `
+            <div class="ev-tile" id="tile_${safeid(e.name)}"
+                 onclick="pickEvent('${e.name.replace(/'/g,"\\'")}','${e.icon||'🎵'}')">
+                <div class="ev-tile-icon">${e.icon || '🎵'}</div>
+                <div class="ev-tile-name">${e.name}</div>
+            </div>
+        `).join('');
+    }
+
+    // ── Pick event → fetch top 10 from MongoDB via backend ──
+    let activeEvent = '';
+    let cachedSongs = [];
+
+    async function pickEvent(name, icon) {
+        document.querySelectorAll('.ev-tile').forEach(t => t.classList.remove('selected'));
+        const tile = document.getElementById('tile_' + safeid(name));
+        if (tile) tile.classList.add('selected');
+
+        activeEvent = name;
+        const card  = document.getElementById('songsCard');
+        card.style.display = 'block';
+        card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+        document.getElementById('songsTitle').textContent = icon + ' ' + name + ' — Top 10';
+        document.getElementById('extractBar').style.display = 'none';
+        document.getElementById('songsList').innerHTML =
+            '<div style="text-align:center;padding:32px;color:var(--text-dim);">Loading top songs…</div>';
+
+        try {
+            const res  = await fetch(`${API}/events/${encodeURIComponent(name)}/top10`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            cachedSongs = Array.isArray(data) ? data : [];
+        } catch (e) {
+            cachedSongs = [];
+        }
+
+        renderSongs(cachedSongs);
+    }
+
+    function renderSongs(songs) {
+        const el = document.getElementById('songsList');
+
+        if (!songs.length) {
+            el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);">🎵 No songs suggested for this event yet.</div>';
+            document.getElementById('extractBar').style.display = 'none';
+            return;
+        }
+
+        const maxV   = Math.max(...songs.map(s => s.votes || 0), 1);
+        const medals = ['🥇','🥈','🥉'];
+
+        el.innerHTML = songs.map((s, i) => {
+            const mc  = i < 3 ? 'm' + i : '';
+            const pct = Math.round(((s.votes || 0) / maxV) * 100);
+            return `
+                <div class="song-row ${mc}">
+                    <div class="${i<3?'rank-label':'rank-num'}">${medals[i] || ('#'+(i+1))}</div>
+                    <div class="song-info">
+                        <div class="song-t">${s.title}</div>
+                        <div class="song-a">${s.artist}</div>
+                    </div>
+                    <div class="vote-wrap">
+                        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+                        <span class="vote-badge">👍 ${s.votes||0}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('extractEvt').textContent = activeEvent;
+        document.getElementById('extractCnt').textContent = songs.length;
+        document.getElementById('extractBar').style.display = 'flex';
+    }
+
+    // ── Download CSV ──
+    function downloadCSV() {
+        if (!cachedSongs.length) { toast('No songs to export.','err'); return; }
+
+        const header = ['Rank','Song Title','Artist','Votes','Event'];
+        const rows   = cachedSongs.map((s, i) => [
+            i + 1,
+            `"${(s.title||'').replace(/"/g,'""')}"`,
+            `"${(s.artist||'').replace(/"/g,'""')}"`,
+            s.votes || 0,
+            `"${activeEvent.replace(/"/g,'""')}"`
+        ]);
+
+        const csv  = [header.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url;
+        a.download = activeEvent.replace(/\s+/g,'_') + '_Top10_Playlist.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        toast('CSV downloaded for "' + activeEvent + '"!');
+    }
+
+    function toast(msg, type = 'ok') {
+        document.querySelectorAll('.toast').forEach(x => x.remove());
+        const el = document.createElement('div');
+        el.className = 'toast ' + type;
+        el.innerHTML = (type==='ok'?'✅ ':'❌ ') + msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 3500);
+    }
+
+    loadEvents();
+</script>
+</body>
+</html>

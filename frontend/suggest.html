@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaylistCollab | Suggest a Song</title>
+    <style>
+        :root {
+            --bg-color: #0b0f1a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+            --success: #10b981;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0b0f1a, #0b0f1a);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            background: linear-gradient(to right, #c084fc, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+
+        .event-badge {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--accent);
+            padding: 6px 20px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: #d8b4fe;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            box-sizing: border-box;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 5px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .autocomplete-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+        }
+
+        .autocomplete-item:hover {
+            background: rgba(139, 92, 246, 0.2);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .info-text {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .card { padding: 30px 25px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button class="back-btn" onclick="goBack()">← Back to Actions</button>
+
+    <header>
+        <h1>🎤 Suggest a Song</h1>
+        <div class="event-badge" id="eventName">Loading...</div>
+    </header>
+
+    <div class="card">
+        <div id="message"></div>
+
+        <form id="suggestForm">
+            <div class="form-group">
+                <label for="songTitle">Song Title *</label>
+                <input 
+                    type="text" 
+                    id="songTitle" 
+                    placeholder="Start typing song name..." 
+                    required
+                    autocomplete="off"
+                >
+                <div id="titleAutocomplete" class="autocomplete-items" style="display: none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="artistName">Artist Name *</label>
+                <input 
+                    type="text" 
+                    id="artistName" 
+                    placeholder="Start typing artist name..." 
+                    required
+                    autocomplete="off"
+                >
+                <div id="artistAutocomplete" class="autocomplete-items" style="display: none;"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                Submit Song Suggestion
+            </button>
+
+            <p class="info-text">
+                💡 Start typing to see suggestions from our database. 
+                You can also enter custom songs not in the list.
+            </p>
+        </form>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:5000/api';
+    let songsData = [];
+
+    // Get selected event
+    const selectedEvent = localStorage.getItem('selectedEvent');
+    if (!selectedEvent) {
+        window.location.href = 'events.html';
+    } else {
+        document.getElementById('eventName').textContent = selectedEvent;
+    }
+
+    // Load CSV data
+    async function loadSongsData() {
+        try {
+            const response = await fetch('songs_dataset.csv');
+            const csvText = await response.text();
+            
+            const lines = csvText.split('\n');
+            songsData = lines.slice(1) // Skip header
+                .filter(line => line.trim())
+                .map(line => {
+                    const [title, artist, genre, year] = line.split(',');
+                    return { 
+                        title: title?.trim(), 
+                        artist: artist?.trim(), 
+                        genre: genre?.trim(), 
+                        year: year?.trim() 
+                    };
+                });
+            
+            console.log('Loaded songs:', songsData.length);
+        } catch (error) {
+            console.error('Error loading songs data:', error);
+        }
+    }
+
+    // Autocomplete for song title
+    const titleInput = document.getElementById('songTitle');
+    const titleAutocomplete = document.getElementById('titleAutocomplete');
+
+    titleInput.addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+        titleAutocomplete.innerHTML = '';
+        
+        if (value.length < 2) {
+            titleAutocomplete.style.display = 'none';
+            return;
+        }
+
+        const matches = songsData
+            .filter(song => song.title.toLowerCase().includes(value))
+            .slice(0, 8); // Show max 8 suggestions
+
+        if (matches.length > 0) {
+            titleAutocomplete.style.display = 'block';
+            matches.forEach(song => {
+                const div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.innerHTML = `<strong>${song.title}</strong><br><small style="color: var(--text-dim);">${song.artist} • ${song.year}</small>`;
+                div.addEventListener('click', () => {
+                    titleInput.value = song.title;
+                    document.getElementById('artistName').value = song.artist;
+                    titleAutocomplete.style.display = 'none';
+                });
+                titleAutocomplete.appendChild(div);
+            });
+        } else {
+            titleAutocomplete.style.display = 'none';
+        }
+    });
+
+    // Autocomplete for artist
+    const artistInput = document.getElementById('artistName');
+    const artistAutocomplete = document.getElementById('artistAutocomplete');
+
+    artistInput.addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+        artistAutocomplete.innerHTML = '';
+        
+        if (value.length < 2) {
+            artistAutocomplete.style.display = 'none';
+            return;
+        }
+
+        // Get unique artists
+        const uniqueArtists = [...new Set(songsData.map(s => s.artist))];
+        const matches = uniqueArtists
+            .filter(artist => artist.toLowerCase().includes(value))
+            .slice(0, 8);
+
+        if (matches.length > 0) {
+            artistAutocomplete.style.display = 'block';
+            matches.forEach(artist => {
+                const div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.textContent = artist;
+                div.addEventListener('click', () => {
+                    artistInput.value = artist;
+                    artistAutocomplete.style.display = 'none';
+                });
+                artistAutocomplete.appendChild(div);
+            });
+        } else {
+            artistAutocomplete.style.display = 'none';
+        }
+    });
+
+    // Close autocomplete when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.form-group')) {
+            titleAutocomplete.style.display = 'none';
+            artistAutocomplete.style.display = 'none';
+        }
+    });
+
+    // Form submission
+    const suggestForm = document.getElementById('suggestForm');
+    const messageDiv = document.getElementById('message');
+    const submitBtn = document.getElementById('submitBtn');
+
+    suggestForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const title = titleInput.value.trim();
+        const artist = artistInput.value.trim();
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+        messageDiv.innerHTML = '';
+
+        try {
+            const response = await fetch(`${API_URL}/songs`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    title, 
+                    artist, 
+                    event: selectedEvent 
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                messageDiv.innerHTML = `
+                    <div class="success-message">
+                        ✅ Song "${title}" by ${artist} successfully added to ${selectedEvent}!
+                    </div>
+                `;
+                suggestForm.reset();
+                
+                // Auto redirect after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'actions.html';
+                }, 2000);
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="error-message">
+                        ⚠️ ${data.error}
+                    </div>
+                `;
+            }
+        } catch (error) {
+            messageDiv.innerHTML = `
+                <div class="error-message">
+                    ⚠️ Connection error. Make sure the backend server is running!
+                </div>
+            `;
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Song Suggestion';
+        }
+    });
+
+    function goBack() {
+        window.location.href = 'actions.html';
+    }
+
+    // Load songs data on page load
+    loadSongsData();
+</script>
+
+</body>
+</html>
